@@ -1,10 +1,10 @@
 {
   "type": "module",
-  "name": "tdoc-deploy",
+  "name": "tdoc-cli",
   "version": "10.0.1",
   "main": "index.js",
   "bin": {
-    "tdoc-deploy": "./index.js"
+    "tdoc-cli": "./index.js"
   },
   "scripts": {
     "start": "node index.js"
