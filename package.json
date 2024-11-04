@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "name": "tdoc-deploy",
+  "version": "10.0.1",
+  "main": "index.js",
+  "bin": {
+    "tdoc-deploy": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "vercel",
+    "github",
+    "api"
+  ],
+  "author": "Marko Klemetti",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "yargs": "^17.7.2"
+  }
+}
