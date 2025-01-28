@@ -7,19 +7,16 @@ import { hideBin } from 'yargs/helpers';
 
 dotenv.config();
 
-/*
-const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
-
-if (!REACT_APP_API_URL) {
-  console.error('Error: Vercel SCOPE not found. Set REACT_APP_API_URL in .env file.');
-  process.exit(1);
-}
-*/
-
 const argv = yargs(hideBin(process.argv))
   .command('create <projectName>', 'Create a new project with GitHub template', (yargs) => {
     return yargs.positional('projectName', {
       describe: 'Name of the new project',
+      type: 'string',
+      demandOption: true
+    })
+    .option('template', {
+      alias: 't',
+      description: 'GitHub repository template name',
       type: 'string',
       demandOption: true
     });
@@ -29,31 +26,20 @@ const argv = yargs(hideBin(process.argv))
       process.exit(1);
     }
   })
-  .option('template', {
-    alias: 't',
-    description: 'GitHub repository template name',
-    type: 'string',
-    demandOption: true
-  })
-  .option('domain', {
-    alias: 'd',
-    description: 'Target domain name for the project',
-    type: 'string',
-    demandOption: true
-  })
   .help()
   .alias('help', 'h')
   .argv;
 
-
 const projectName = argv.projectName;
 const templateName = argv.template;
-const domainName = argv.domain;
 
-
-function runCommand(command, options = {}) {
+function runCommand(command, { logging = true, ...options } = { stdio: 'inherit' }) {
   try {
-    console.log(`Running command: ${command}`);
+    if (logging) {
+      console.log(`Running command: ${command}`);
+    } else {
+      console.log('Running command: [REDACTED]');
+    }
     execSync(command, { ...options });
   } catch (error) {
     console.error(`Error executing command: ${command}`, error.message);
@@ -61,34 +47,25 @@ function runCommand(command, options = {}) {
   }
 }
 
-
-function getRepoName(options = {}) {
-  try {
-    const remoteUrl = execSync('git config --get remote.origin.url', { ...options }).toString().trim();
-    const repoMatch = remoteUrl.match(/github\.com[:/](.+\/.+)\.git$/);
-    if (repoMatch) {
-      return repoMatch[1]; // Returns 'username/repository'
-    } else {
-      throw new Error('Not a GitHub repository or invalid remote URL');
-    }
-  } catch (error) {
-    console.error('Error retrieving repository name:', error.message);
+(async function main() {
+  if (!projectName || !templateName) {
+    console.error('Error: projectName and template are required.');
     process.exit(1);
   }
-}
 
-
-(async function main() {
   runCommand(`gh repo create ${projectName} --template ${templateName} --public`);
 
   runCommand(`gh repo clone ${projectName}`);
+  process.chdir(projectName);
 
-  const repoName = getRepoName({ cwd: `./${projectName}` });
+  runCommand(`gh secret set AWS_BUCKET_NAME --body "${process.env.AWS_BUCKET_NAME}"`, { logging: false });
+  runCommand(`gh secret set AWS_ACCESS_KEY_ID --body "${process.env.AWS_ACCESS_KEY_ID}"`, { logging: false });
+  runCommand(`gh secret set AWS_SECRET_ACCESS_KEY --body "${process.env.AWS_SECRET_ACCESS_KEY}"`, { logging: false });
+  runCommand(`gh secret set AWS_SESSION_TOKEN --body "${process.env.AWS_SESSION_TOKEN}"`, { logging: false });
+  runCommand(`gh secret set AWS_DEFAULT_REGION --body "${process.env.AWS_DEFAULT_REGION}"`, { logging: false });
 
-  // const { id: projectId , link: { repoId } } = await createVercelProject(repoName);
-  // if (domainName) await assignDomain(projectId, domainName);
-  // await addEnvironmentVariable(projectId, 'REACT_APP_API_URL', REACT_APP_API_URL, ['production', 'preview', 'development']);
-  // await triggerDeployment(repoName, repoId);
+  runCommand('gh workflow run cd.yml');
+  // runCommand('git commit --allow-empty -m "Trigger GitHub Actions" && git push');
 
-  console.log(`Application deployed to: https://${domainName}`);
+  console.log(`Project created, follow deployment here: https://github.com/mrako/${projectName}/actions`);
 })();
