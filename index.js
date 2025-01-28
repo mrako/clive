@@ -5,19 +5,16 @@ import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-
-import { createVercelProject, assignDomain, addEnvironmentVariable, triggerDeployment } from './vercel.js';
-
-
 dotenv.config();
 
+/*
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
 if (!REACT_APP_API_URL) {
   console.error('Error: Vercel SCOPE not found. Set REACT_APP_API_URL in .env file.');
   process.exit(1);
 }
-
+*/
 
 const argv = yargs(hideBin(process.argv))
   .command('create <projectName>', 'Create a new project with GitHub template', (yargs) => {
@@ -88,13 +85,10 @@ function getRepoName(options = {}) {
 
   const repoName = getRepoName({ cwd: `./${projectName}` });
 
-  const { id: projectId , link: { repoId } } = await createVercelProject(repoName);
-
-  if (domainName) await assignDomain(projectId, domainName);
-
-  await addEnvironmentVariable(projectId, 'REACT_APP_API_URL', REACT_APP_API_URL, ['production', 'preview', 'development']);
-
-  await triggerDeployment(repoName, repoId);
+  // const { id: projectId , link: { repoId } } = await createVercelProject(repoName);
+  // if (domainName) await assignDomain(projectId, domainName);
+  // await addEnvironmentVariable(projectId, 'REACT_APP_API_URL', REACT_APP_API_URL, ['production', 'preview', 'development']);
+  // await triggerDeployment(repoName, repoId);
 
   console.log(`Application deployed to: https://${domainName}`);
 })();
