@@ -2,12 +2,12 @@
   "type": "module",
   "name": "devex-cli",
   "version": "10.0.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": {
-    "devex-cli": "./index.js"
+    "@mrako/clive": "./src/index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
   "keywords": [
     "github",
