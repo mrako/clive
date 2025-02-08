@@ -1,15 +1,15 @@
 import axios, { AxiosError } from 'axios';
 
-interface VercelProject {
+interface IVercelProject {
   id: string;
-  name: string;
   link: {
     repoId: string;
     type: string;
   };
+  name: string;
 }
 
-interface VercelError {
+interface IVercelError {
   error: {
     message: string;
   };
@@ -37,17 +37,17 @@ const axiosInstance = axios.create({
   }
 });
 
-export async function createVercelProject(repoName: string): Promise<VercelProject | void> {
+export async function createVercelProject(repoName: string): Promise<IVercelProject | void> {
   const projectName = repoName.split('/')[1];
   const apiUrl = `https://api.vercel.com/v9/projects?teamId=${VERCEL_SCOPE}`;
 
   try {
-    const { data } = await axiosInstance.post<VercelProject>(apiUrl, {
+    const { data } = await axiosInstance.post<IVercelProject>(apiUrl, {
       name: projectName,
-      gitRepository: {
-        type: 'github',
+      repository: {
         repo: repoName,
-        sourceless: false
+        sourceless: false,
+        type: 'github'
       },
       rootDirectory: 'frontend'
     });
@@ -56,7 +56,7 @@ export async function createVercelProject(repoName: string): Promise<VercelProje
     return data;
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data) {
-      const errorData = error.response.data as VercelError;
+      const errorData = error.response.data as IVercelError;
       console.error('Error creating Vercel project:', errorData.error.message);
     } else {
       console.error('Error creating Vercel project:', (error as Error).message);
@@ -90,16 +90,16 @@ export async function addEnvironmentVariable(
       `https://api.vercel.com/v9/projects/${projectId}/env?teamId=${VERCEL_SCOPE}`,
       {
         key,
-        value,
         target: environments,
-        type: 'plain'
+        type: 'plain',
+        value
       }
     );
 
     console.log(`Environment variable ${key} added successfully.`);
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data) {
-      const errorData = error.response.data as VercelError;
+      const errorData = error.response.data as IVercelError;
       console.error('Error adding environment variable:', errorData.error.message);
     } else {
       console.error('Error adding environment variable:', (error as Error).message);
@@ -114,11 +114,11 @@ export async function triggerDeployment(repoName: string, repoId: string): Promi
   try {
     const { data } = await axiosInstance.post(apiUrl, {
       name: projectName,
-      gitSource: {
-        type: 'github',
-        repoId: repoId,
+      source: {
         ref: 'main',
-      },
+        repoId,
+        type: 'github'
+      }
     });
 
     console.log(`Deployment triggered successfully to: https://${data.alias[0]}`);
