@@ -1,0 +1,30 @@
+name: Continuous Integration
+
+on: push
+
+jobs:
+  build:
+    name: Continuous Integration
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            node-modules-${{ runner.os }}-
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
