@@ -1,7 +1,11 @@
 import { execSync } from 'child_process';
 import yaml from 'js-yaml';
 
-export function getCliveConfig(owner: string, repo: string) {
+interface ICliveConfig {
+  [key: string]: unknown;
+}
+
+export function getCliveConfig(owner: string, repo: string): ICliveConfig {
   try {
     console.log('Fetching clive-config.yml using gh api');
     const command = `gh api repos/${owner}/${repo}/contents/clive-config.yml -q .content`;
