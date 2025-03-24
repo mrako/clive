@@ -8,8 +8,7 @@
     "clive": "./dist/index.js"
   },
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "tsc && chmod +x ./dist/index.js",
     "test": "jest",
     "lint": "tslint -p tsconfig.json",
     "prepublishOnly": "npm run build",
