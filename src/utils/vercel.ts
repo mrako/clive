@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import axios, { AxiosError } from 'axios';
+
+dotenv.config();
 
 interface IVercelProject {
   id: string;
@@ -19,6 +22,7 @@ type Environment = 'production' | 'preview' | 'development';
 
 const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
 const VERCEL_SCOPE = process.env.VERCEL_SCOPE;
+const ENDPOINT = process.env.ENDPOINT;
 
 if (!VERCEL_API_TOKEN) {
   console.error('Error: Vercel API token not found. Set VERCEL_API_TOKEN in .env file.');
@@ -27,6 +31,11 @@ if (!VERCEL_API_TOKEN) {
 
 if (!VERCEL_SCOPE) {
   console.error('Error: Vercel SCOPE not found. Set VERCEL_SCOPE in .env file.');
+  process.exit(1);
+}
+
+if (!ENDPOINT) {
+  console.error('Error: Target ENDPOINT not found. Set ENDPOINT in .env file.');
   process.exit(1);
 }
 
@@ -44,9 +53,8 @@ export async function createVercelProject(repoName: string): Promise<IVercelProj
   try {
     const { data } = await axiosInstance.post<IVercelProject>(apiUrl, {
       name: projectName,
-      repository: {
+      gitRepository: {
         repo: repoName,
-        sourceless: false,
         type: 'github'
       },
       rootDirectory: 'frontend'
@@ -82,9 +90,13 @@ export async function assignDomain(projectId: string, domain: string): Promise<v
 export async function addEnvironmentVariable(
   projectId: string,
   key: string,
-  value: string,
+  value: string | undefined,
   environments: Environment[]
 ): Promise<void> {
+  if (!value) {
+    throw new Error(`Environment variable "${key}" is not defined.`);
+  }
+
   try {
     await axiosInstance.post(
       `https://api.vercel.com/v9/projects/${projectId}/env?teamId=${VERCEL_SCOPE}`,
@@ -114,11 +126,12 @@ export async function triggerDeployment(repoName: string, repoId: string): Promi
   try {
     const { data } = await axiosInstance.post(apiUrl, {
       name: projectName,
-      source: {
+      gitSource: {
+        type: 'github',
         ref: 'main',
         repoId,
-        type: 'github'
-      }
+      },
+      target: 'production',
     });
 
     console.log(`Deployment triggered successfully to: https://${data.alias[0]}`);
@@ -129,4 +142,15 @@ export async function triggerDeployment(repoName: string, repoId: string): Promi
       console.error('Error triggering deployment:', (error as Error).message);
     }
   }
+}
+
+export async function deployToVercel(repoName: string, domain: string): Promise<void> {
+  const project = await createVercelProject(repoName);
+  if (!project) throw new Error('Failed to create Vercel project');
+
+  const { id: projectId, link: { repoId } } = project;
+
+  await assignDomain(projectId, domain);
+  await addEnvironmentVariable(projectId, 'VITE_ENDPOINT', ENDPOINT, ['production', 'preview', 'development']);
+  await triggerDeployment(repoName, repoId);
 }

@@ -1,28 +1,21 @@
 import { jest } from '@jest/globals';
+import { createProject } from '../../src/commands/create.js';
+import { runCommand } from '../../src/helpers.js';
 
-jest.mock('../src/helpers.js', () => ({
-  runCommand: jest.fn(),
-  setupYargs: jest.fn().mockReturnValue({
-    projectName: 'test-project',
-    template: 'test-template'
-  })
-}));
-
-jest.mock('../src/config.js', () => ({
+jest.mock('../../src/config.js', () => ({
   getCliveConfig: jest.fn().mockReturnValue({
-    environment: 'test',
     name: 'test-config',
+    environment: 'test'
   })
 }));
 
-jest.mock('dotenv', () => ({
-  config: jest.fn()
+jest.mock('../../src/helpers.js', () => ({
+  runCommand: jest.fn()
 }));
 
-import { runCommand } from '../src/helpers.js';
-import { main } from '../src/index.js';
+const mockChdir = jest.spyOn(process, 'chdir').mockImplementation(() => undefined);
 
-describe('CLI Integration', () => {
+describe('Create Command', () => {
   const mockRunCommand = runCommand as jest.MockedFunction<typeof runCommand>;
   const executedCommands: string[] = [];
 
@@ -35,12 +28,22 @@ describe('CLI Integration', () => {
     });
   });
 
+  afterAll(() => {
+    mockChdir.mockRestore();
+  });
+
   it('should execute the expected commands in correct order', async () => {
-    await main();
+    await createProject({
+      _: [],
+      $0: 'test',
+      projectName: 'test-project',
+      template: 'test-template'
+    });
 
     expect(executedCommands).toEqual([
       'gh repo create test-project --template test-template --public',
       'gh repo clone test-project'
     ]);
+    expect(mockChdir).toHaveBeenCalledWith('test-project');
   });
 });
