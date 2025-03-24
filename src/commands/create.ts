@@ -27,10 +27,6 @@ function getRepoName(options = {}) {
 }
 
 export async function createProject({ projectName, template }: ICreateArgs): Promise<string> {
-  const owner = 'mrako';
-  const configData = getCliveConfig(owner, template);
-  console.log('Parsed YAML configuration:', configData);
-
   runCommand(`gh repo create ${projectName} --template ${template} --public`);
   runCommand(`gh repo clone ${projectName}`);
 

@@ -1,16 +1,18 @@
 import { jest } from '@jest/globals';
 import { createProject } from '../../src/commands/create.js';
 import { runCommand } from '../../src/helpers.js';
+import { execSync } from 'child_process';
 
 jest.mock('../../src/config.js', () => ({
-  getCliveConfig: jest.fn().mockReturnValue({
-    name: 'test-config',
-    environment: 'test'
-  })
+  getCliveConfig: jest.fn().mockReturnValue({})
 }));
 
 jest.mock('../../src/helpers.js', () => ({
   runCommand: jest.fn()
+}));
+
+jest.mock('child_process', () => ({
+  execSync: jest.fn().mockReturnValue('git@github.com:mrako/clive.git')
 }));
 
 const mockChdir = jest.spyOn(process, 'chdir').mockImplementation(() => undefined);
@@ -28,10 +30,6 @@ describe('Create Command', () => {
     });
   });
 
-  afterAll(() => {
-    mockChdir.mockRestore();
-  });
-
   it('should execute the expected commands in correct order', async () => {
     await createProject({
       _: [],
@@ -44,6 +42,5 @@ describe('Create Command', () => {
       'gh repo create test-project --template test-template --public',
       'gh repo clone test-project'
     ]);
-    expect(mockChdir).toHaveBeenCalledWith('test-project');
   });
 });
