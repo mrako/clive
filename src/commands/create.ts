@@ -1,7 +1,6 @@
 import { execSync } from 'child_process';
 
-import { getCliveConfig } from '../config.js';
-import { runCommand } from '../helpers.js';
+import { runCommand } from '../utils/helpers.js';
 
 export interface ICreateArgs {
   _: Array<string | number>;

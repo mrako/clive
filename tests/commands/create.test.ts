@@ -1,13 +1,13 @@
 import { jest } from '@jest/globals';
 import { createProject } from '../../src/commands/create.js';
-import { runCommand } from '../../src/helpers.js';
+import { runCommand } from '../../src/utils/helpers.js';
 import { execSync } from 'child_process';
 
 jest.mock('../../src/config.js', () => ({
   getCliveConfig: jest.fn().mockReturnValue({})
 }));
 
-jest.mock('../../src/helpers.js', () => ({
+jest.mock('../../src/utils/helpers.js', () => ({
   runCommand: jest.fn()
 }));
 
