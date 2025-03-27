@@ -3,8 +3,6 @@ import { createProject, ICreateArgs } from '../commands/create.js';
 import { deployToVercel } from '../utils/vercel.js';
 
 export const createCommand: CommandModule<{}, ICreateArgs> = {
-  command: 'create <projectName>',
-  describe: 'Create a new project with GitHub template',
   builder: (yargs) => {
     return yargs
       .positional('projectName', {
@@ -25,6 +23,8 @@ export const createCommand: CommandModule<{}, ICreateArgs> = {
         type: 'string'
       });
   },
+  command: 'create <projectName>',
+  describe: 'Create a new project with GitHub template',
   handler: async (argv) => {
     const repoName = await createProject(argv);
 

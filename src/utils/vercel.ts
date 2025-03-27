@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
 import axios, { AxiosError } from 'axios';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -52,11 +52,11 @@ export async function createVercelProject(repoName: string): Promise<IVercelProj
 
   try {
     const { data } = await axiosInstance.post<IVercelProject>(apiUrl, {
-      name: projectName,
       gitRepository: {
         repo: repoName,
         type: 'github'
       },
+      name: projectName,
       rootDirectory: 'frontend'
     });
 
@@ -125,12 +125,12 @@ export async function triggerDeployment(repoName: string, repoId: string): Promi
 
   try {
     const { data } = await axiosInstance.post(apiUrl, {
-      name: projectName,
       gitSource: {
-        type: 'github',
         ref: 'main',
         repoId,
+        type: 'github',
       },
+      name: projectName,
       target: 'production',
     });
 
@@ -146,7 +146,9 @@ export async function triggerDeployment(repoName: string, repoId: string): Promi
 
 export async function deployToVercel(repoName: string, domain: string): Promise<void> {
   const project = await createVercelProject(repoName);
-  if (!project) throw new Error('Failed to create Vercel project');
+  if (!project) {
+    throw new Error('Failed to create Vercel project');
+  }
 
   const { id: projectId, link: { repoId } } = project;
 
