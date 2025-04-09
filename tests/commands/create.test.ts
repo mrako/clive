@@ -3,7 +3,7 @@ import { createProject } from '../../src/commands/create.js';
 import { runCommand } from '../../src/utils/helpers.js';
 import { execSync } from 'child_process';
 
-jest.mock('../../src/config.js', () => ({
+jest.mock('../../src/utils/config.js', () => ({
   getCliveConfig: jest.fn().mockReturnValue({})
 }));
 
