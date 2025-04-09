@@ -21,6 +21,12 @@ export const createCommand: CommandModule<{}, ICreateArgs> = {
         demandOption: false,
         description: 'Deploy the application after creation (e.g., vercel)',
         type: 'string'
+      })
+      .option('private', {
+        alias: 'p',
+        demandOption: false,
+        description: 'Create the repository as private',
+        type: 'boolean',
       });
   },
   command: 'create <projectName>',

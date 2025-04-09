@@ -8,6 +8,7 @@ export interface ICreateArgs {
   projectName: string;
   template: string;
   domain?: string;
+  private?: boolean;
 }
 
 function getRepoName(options = {}) {
@@ -25,8 +26,9 @@ function getRepoName(options = {}) {
   }
 }
 
-export async function createProject({ projectName, template }: ICreateArgs): Promise<string> {
-  runCommand(`gh repo create ${projectName} --template ${template} --public`);
+export async function createProject({ projectName, template, private: isPrivate }: ICreateArgs): Promise<string> {
+  const visibilityFlag = isPrivate ? '--private' : '--public';
+  runCommand(`gh repo create ${projectName} --template ${template} ${visibilityFlag}`);
   runCommand(`gh repo clone ${projectName}`);
 
   return getRepoName({ cwd: `./${projectName}` });
