@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import { runCommand } from '../utils/helpers.js';
 
 export interface ICreateArgs {
-  _: Array<string | number>;
+  _: (string | number)[];
   $0: string;
   projectName: string;
   template: string;
