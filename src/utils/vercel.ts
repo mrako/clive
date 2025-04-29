@@ -23,6 +23,7 @@ type Environment = 'production' | 'preview' | 'development';
 const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
 const VERCEL_SCOPE = process.env.VERCEL_SCOPE;
 const ENDPOINT = process.env.ENDPOINT;
+const ROOT_DIRECTORY = process.env.ROOT_DIRECTORY || 'frontend';
 
 if (!VERCEL_API_TOKEN) {
   console.error('Error: Vercel API token not found. Set VERCEL_API_TOKEN in .env file.');
@@ -57,7 +58,7 @@ export async function createVercelProject(repoName: string): Promise<IVercelProj
         type: 'github'
       },
       name: projectName,
-      rootDirectory: 'frontend'
+      rootDirectory: ROOT_DIRECTORY,
     });
 
     console.log(`Project '${data.id}' with repo id '${data.link.repoId}' created successfully on Vercel.`);
@@ -153,6 +154,6 @@ export async function deployToVercel(repoName: string, domain: string): Promise<
   const { id: projectId, link: { repoId } } = project;
 
   await assignDomain(projectId, domain);
-  await addEnvironmentVariable(projectId, 'VITE_ENDPOINT', ENDPOINT, ['production', 'preview', 'development']);
+  await addEnvironmentVariable(projectId, 'VITE_ENDPOINT', ENDPOINT, ['production', 'preview']);
   await triggerDeployment(repoName, repoId);
 }

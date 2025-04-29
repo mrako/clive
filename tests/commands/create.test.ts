@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals';
 import { createProject } from '../../src/commands/create.js';
 import { runCommand } from '../../src/utils/helpers.js';
-import { execSync } from 'child_process';
 
 jest.mock('../../src/utils/config.js', () => ({
   getCliveConfig: jest.fn().mockReturnValue({})
@@ -14,8 +13,6 @@ jest.mock('../../src/utils/helpers.js', () => ({
 jest.mock('child_process', () => ({
   execSync: jest.fn().mockReturnValue('git@github.com:mrako/clive.git')
 }));
-
-const mockChdir = jest.spyOn(process, 'chdir').mockImplementation(() => undefined);
 
 describe('Create Command', () => {
   const mockRunCommand = runCommand as jest.MockedFunction<typeof runCommand>;

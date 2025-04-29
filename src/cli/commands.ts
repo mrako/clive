@@ -1,6 +1,7 @@
 import type { CommandModule } from 'yargs';
 import { createProject, ICreateArgs } from '../commands/create.js';
 import { deployToVercel } from '../utils/vercel.js';
+import { destroyProject, IDestroyArgs } from '../commands/destroy.js';
 
 export const createCommand: CommandModule<{}, ICreateArgs> = {
   builder: (yargs) => {
@@ -37,5 +38,26 @@ export const createCommand: CommandModule<{}, ICreateArgs> = {
     if (argv.domain) {
       await deployToVercel(repoName, argv.domain);
     }
+  }
+};
+
+export const destroyCommand: CommandModule<{}, { projectName: string }> = {
+  builder: (yargs) => {
+    return yargs
+      .positional('projectName', {
+        demandOption: true,
+        describe: 'Name of the project to destroy',
+        type: 'string',
+      });
+  },
+  command: 'destroy <projectName>',
+  describe: 'Destroy a project: delete GitHub repo',
+  handler: async (argv) => {
+    // Dynamically get the GitHub username
+    const owner = (await import('child_process')).execSync('gh api user -q .login').toString().trim();
+    await destroyProject({
+      projectName: argv.projectName,
+      owner
+    });
   }
 };
