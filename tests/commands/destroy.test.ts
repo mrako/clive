@@ -26,7 +26,7 @@ describe('Destroy Command', () => {
 
     expect(executedCommands).toEqual([
       'gh repo delete mrako/test-project --yes',
-      'vercel project rm test-project --scope team_123 --yes'
+      'vercel project rm test-project --scope team_123'
     ]);
   });
 });
