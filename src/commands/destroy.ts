@@ -13,6 +13,6 @@ const VERCEL_SCOPE = process.env.VERCEL_SCOPE;
 export async function destroyProject({ projectName, owner }: IDestroyArgs): Promise<void> {
   runCommand(`gh repo delete ${owner}/${projectName} --yes`);
   if (VERCEL_SCOPE) {
-    runCommand(`vercel project rm ${projectName} --scope ${VERCEL_SCOPE} --yes`);
+    runCommand(`vercel project rm ${projectName} --scope ${VERCEL_SCOPE}`);
   }
 }

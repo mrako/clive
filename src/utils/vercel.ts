@@ -23,7 +23,7 @@ type Environment = 'production' | 'preview' | 'development';
 const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
 const VERCEL_SCOPE = process.env.VERCEL_SCOPE;
 const ENDPOINT = process.env.ENDPOINT;
-const ROOT_DIRECTORY = process.env.ROOT_DIRECTORY || 'frontend';
+const ROOT_DIRECTORY = process.env.ROOT_DIRECTORY;
 
 if (!VERCEL_API_TOKEN) {
   console.error('Error: Vercel API token not found. Set VERCEL_API_TOKEN in .env file.');
@@ -52,14 +52,19 @@ export async function createVercelProject(repoName: string): Promise<IVercelProj
   const apiUrl = `https://api.vercel.com/v9/projects?teamId=${VERCEL_SCOPE}`;
 
   try {
-    const { data } = await axiosInstance.post<IVercelProject>(apiUrl, {
+    const projectConfig: any = {
       gitRepository: {
-        repo: repoName,
-        type: 'github'
+      repo: repoName,
+      type: 'github'
       },
-      name: projectName,
-      rootDirectory: ROOT_DIRECTORY,
-    });
+      name: projectName
+    };
+
+    if (ROOT_DIRECTORY) {
+      projectConfig.rootDirectory = ROOT_DIRECTORY;
+    }
+
+    const { data } = await axiosInstance.post<IVercelProject>(apiUrl, projectConfig);
 
     console.log(`Project '${data.id}' with repo id '${data.link.repoId}' created successfully on Vercel.`);
     return data;
